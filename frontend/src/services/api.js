@@ -1,11 +1,15 @@
 import axios from "axios";
 
+const API =
+    import.meta.env.VITE_API_URL ||
+    "http://localhost:5000";
+
 export const uploadPcap = async (file) => {
     const formData = new FormData();
     formData.append("pcap", file);
 
     const res = await axios.post(
-        "http://localhost:5000/api/scan/upload",
+        `${API}/api/scan/upload`,
         formData,
         {
             headers: {

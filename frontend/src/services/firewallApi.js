@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/firewall";
+const API =
+    (import.meta.env.VITE_API_URL || "http://localhost:5000") +
+    "/api/firewall";
 
 export const getRules = async () => {
     const res = await axios.get(API);
