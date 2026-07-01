@@ -1,0 +1,18 @@
+{
+  "blockedIPs": [],
+  "blockedDomains": [
+    "facebook.com"
+  ],
+  "blockedPorts": [],
+  "blockedApps": [
+    "Instagram",
+    "Facebook"
+  ],
+  "allowedProtocols": {
+    "tcp": true,
+    "udp": true,
+    "http": true,
+    "https": true,
+    "dns": true
+  }
+}

@@ -1,0 +1,10 @@
+[BLOCKED_IPS]
+
+[BLOCKED_APPS]
+Instagram
+Facebook
+
+[BLOCKED_DOMAINS]
+facebook.com
+
+[BLOCKED_PORTS]

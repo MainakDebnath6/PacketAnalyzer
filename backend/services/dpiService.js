@@ -1,3 +1,4 @@
+const { generateRuleFile } = require("./ruleFileGenerator");
 const { spawn } = require("child_process");
 const path = require("path");
 
@@ -8,36 +9,44 @@ exports.runDPI = (inputFile, outputFile) => {
             __dirname,
             "../../cpp-engine/build/dpi_engine"
         );
+
+        // Generate the latest rules file
+        const rulesFile = generateRuleFile();
+
         console.log("Executable:", executable);
         console.log("Input:", inputFile);
         console.log("Output:", outputFile);
-        const process = spawn(executable, [inputFile, outputFile], {
-    cwd: path.join(__dirname, "../../cpp-engine/build")
-});
-process.on("error", (err) => {
-    console.error(err);
-    reject(err);
-});
+        console.log("Rules:", rulesFile);
+
+        const process = spawn(executable, [
+            inputFile,
+            outputFile,
+            "--rules",
+            rulesFile
+        ]);
+
+        process.on("error", (err) => {
+            console.error("DPI Engine Error:", err);
+            reject(err);
+        });
 
         let stdout = "";
         let stderr = "";
 
-        process.stdout.on("data", data => {
+        process.stdout.on("data", (data) => {
             stdout += data.toString();
         });
 
-        process.stderr.on("data", data => {
+        process.stderr.on("data", (data) => {
             stderr += data.toString();
         });
 
-        process.on("close", code => {
-
+        process.on("close", (code) => {
             if (code === 0) {
                 resolve(stdout);
             } else {
-                reject(stderr);
+                reject(stderr || `DPI Engine exited with code ${code}`);
             }
-
         });
 
     });

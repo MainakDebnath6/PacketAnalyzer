@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(include)
 
+find_package(nlohmann_json REQUIRED)
+find_package(Threads REQUIRED)
+
 set(SOURCES
     src/main_dpi.cpp
     src/dpi_engine.cpp
@@ -18,10 +21,14 @@ set(SOURCES
     src/rule_manager.cpp
     src/sni_extractor.cpp
     src/types.cpp
+    src/FirewallRules.cpp
 )
 
 add_executable(dpi_engine ${SOURCES})
 
-find_package(Threads REQUIRED)
-
-target_link_libraries(dpi_engine PRIVATE Threads::Threads)
+target_link_libraries(
+    dpi_engine
+    PRIVATE
+    Threads::Threads
+    nlohmann_json::nlohmann_json
+)

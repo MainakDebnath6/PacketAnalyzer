@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const scanRoutes = require("./routes/scanRoutes");
+const firewallRoutes = require("./routes/firewallRoutes");
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/scan", scanRoutes);
+app.use("/api/firewall", firewallRoutes);
 
 app.get("/", (req, res) => {
     res.json({
