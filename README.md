@@ -1,1053 +1,1724 @@
-# DPI Engine - Deep Packet Inspection System
+<div align="center">
 
+# 🛡️ Packet Analyzer Platform
+### Deep Packet Inspection • Network Traffic Analysis • Intelligent Firewall • Analytics Dashboard
 
-This document explains **everything** about this project - from basic networking concepts to the complete code architecture. After reading this, you should understand exactly how packets flow through the system without needing to read the code.
+<p align="center">
 
----
-
-## Table of Contents
-
-1. [What is DPI?](#1-what-is-dpi)
-2. [Networking Background](#2-networking-background)
-3. [Project Overview](#3-project-overview)
-4. [File Structure](#4-file-structure)
-5. [The Journey of a Packet (Simple Version)](#5-the-journey-of-a-packet-simple-version)
-6. [The Journey of a Packet (Multi-threaded Version)](#6-the-journey-of-a-packet-multi-threaded-version)
-7. [Deep Dive: Each Component](#7-deep-dive-each-component)
-8. [How SNI Extraction Works](#8-how-sni-extraction-works)
-9. [How Blocking Works](#9-how-blocking-works)
-10. [Building and Running](#10-building-and-running)
-11. [Understanding the Output](#11-understanding-the-output)
+A full-stack **Deep Packet Inspection (DPI) Platform** that combines a high-performance **C++ packet processing engine** with a modern **React dashboard** and **Node.js backend** to analyze PCAP files, classify network traffic, generate analytics, and simulate enterprise-grade firewall management.
 
 ---
 
-## 1. What is DPI?
+### 🌐 Live Demo
 
-**Deep Packet Inspection (DPI)** is a technology used to examine the contents of network packets as they pass through a checkpoint. Unlike simple firewalls that only look at packet headers (source/destination IP), DPI looks *inside* the packet payload.
+https://packetanalyzer-frontend.onrender.com
 
-### Real-World Uses:
-- **ISPs**: Throttle or block certain applications (e.g., BitTorrent)
-- **Enterprises**: Block social media on office networks
-- **Parental Controls**: Block inappropriate websites
-- **Security**: Detect malware or intrusion attempts
+</p>
 
-### What Our DPI Engine Does:
+<img src="./assets/dashboard.png" width="100%" />
+
+</div>
+
+---
+
+# Table of Contents
+
+- Introduction
+- Why This Project Exists
+- Features
+- Technology Stack
+- System Architecture
+- Packet Journey
+- Project Structure
+- Frontend Architecture
+- Backend Architecture
+- DPI Engine
+- Firewall System
+- Analytics Engine
+- Report Generation
+- API Overview
+- Installation
+- Running the Project
+- Performance
+- Future Improvements
+
+---
+
+# Introduction
+
+Modern organizations generate enormous amounts of network traffic every second.
+
+Traditional firewalls only inspect packet headers such as IP addresses, ports and protocols. While this is sufficient for basic filtering, it cannot determine **what application is actually communicating** or **what services are being accessed**.
+
+Deep Packet Inspection (DPI) solves this problem by inspecting the packet payload and protocol metadata to identify applications such as:
+
+- YouTube
+- Facebook
+- Google
+- GitHub
+- DNS
+- HTTP
+- HTTPS
+
+This project extends a custom-built **C++ DPI Engine** into a complete web platform where users can upload PCAP captures, inspect network traffic, manage firewall rules and visualize detailed analytics through an interactive dashboard.
+
+Instead of working only from the command line, the entire packet inspection workflow can now be performed through an intuitive browser interface.
+
+---
+
+# Why This Project Exists
+
+Most academic packet analyzers stop after parsing packets.
+
+This project goes significantly further by demonstrating how packet inspection engines are integrated into modern software systems.
+
+The platform combines three independent systems:
+
+- A high-performance C++ Deep Packet Inspection Engine
+- A REST API backend built with Express.js
+- A React frontend for visualization and firewall management
+
+Together they simulate the architecture commonly found in enterprise network security products.
+
+Examples include:
+
+- Cisco Firepower
+- Palo Alto Networks
+- Suricata
+- Zeek
+- Wireshark (analysis workflow)
+
+---
+
+# What This Platform Can Do
+
+✔ Upload PCAP files directly from the browser
+
+✔ Execute packet inspection using the C++ analysis engine
+
+✔ Parse Ethernet, IPv4, TCP and UDP packets
+
+✔ Extract TLS Server Name Indication (SNI)
+
+✔ Classify network traffic by application
+
+✔ Detect HTTPS services without decrypting traffic
+
+✔ Manage firewall rules
+
+✔ Block applications
+
+✔ Block IP addresses
+
+✔ Block domains
+
+✔ Generate traffic analytics
+
+✔ Display protocol distribution
+
+✔ Display application statistics
+
+✔ Generate inspection reports
+
+✔ View packet summaries through an interactive dashboard
+
+---
+
+# Technology Stack
+
+## Frontend
+
+- React
+- Vite
+- Tailwind CSS
+- Axios
+- React Router
+
+---
+
+## Backend
+
+- Node.js
+- Express.js
+- REST APIs
+- Child Process Integration
+- File Upload Handling
+
+---
+
+## DPI Engine
+
+- Modern C++
+- Multi-threading
+- PCAP Parsing
+- TLS Inspection
+- Flow Tracking
+- Rule Engine
+- Traffic Classification
+
+---
+
+## Networking Concepts
+
+- Ethernet
+- IPv4
+- TCP
+- UDP
+- DNS
+- HTTP
+- HTTPS
+- TLS
+- SNI Extraction
+
+---
+
+# High Level Architecture
+
+```mermaid
+flowchart LR
+
+A[User]
+
+B[React Dashboard]
+
+C[Express Backend]
+
+D[C++ DPI Engine]
+
+E[Firewall Rules]
+
+F[Traffic Analytics]
+
+G[Reports]
+
+A --> B
+
+B --> C
+
+C --> D
+
+D --> E
+
+D --> F
+
+D --> G
+
+E --> B
+
+F --> B
+
+G --> B
 ```
-User Traffic (PCAP) → [DPI Engine] → Filtered Traffic (PCAP)
-                           ↓
-                    - Identifies apps (YouTube, Facebook, etc.)
-                    - Blocks based on rules
-                    - Generates reports
+
+The platform separates responsibilities into three independent layers.
+
+The React frontend focuses entirely on user interaction.
+
+The Express backend acts as an orchestration layer that receives uploaded PCAP files, manages firewall configurations and communicates with the packet processing engine.
+
+The C++ engine performs all heavy network analysis before returning structured results back to the backend.
+
+---
+
+# Complete Processing Pipeline
+
+```mermaid
+flowchart TD
+
+Upload[Upload PCAP]
+
+API[Backend API]
+
+Engine[DPI Engine]
+
+Parser[Packet Parser]
+
+Classifier[Application Classifier]
+
+Firewall[Firewall Rules]
+
+Analytics[Analytics Engine]
+
+Dashboard[Frontend Dashboard]
+
+Report[Report Generator]
+
+Upload --> API
+
+API --> Engine
+
+Engine --> Parser
+
+Parser --> Classifier
+
+Classifier --> Firewall
+
+Firewall --> Analytics
+
+Analytics --> Dashboard
+
+Analytics --> Report
+```
+
+The workflow begins when a PCAP file is uploaded through the web interface.
+
+The backend stores the uploaded capture and invokes the native C++ packet inspection engine.
+
+The engine parses every packet, extracts protocol information, identifies applications using TLS SNI extraction and applies firewall rules.
+
+Once packet processing is complete, the generated statistics are returned to the backend as structured data.
+
+Finally, the frontend renders analytics, firewall status and packet summaries for the user.
+
+# How the Entire System Works
+
+The Packet Analyzer Platform is composed of three independent layers that work together to analyze captured network traffic.
+
+- **React Frontend** provides an interactive dashboard for uploading PCAP files, managing firewall rules, and visualizing analytics.
+- **Express Backend** acts as the orchestration layer, exposing REST APIs, managing uploads, invoking the native engine, and returning structured results.
+- **C++ DPI Engine** performs the actual packet inspection, protocol parsing, traffic classification, and statistics generation.
+
+This separation keeps the application modular, scalable, and easy to extend.
+
+---
+
+
+# Installation
+
+## Prerequisites
+
+Before running the project, ensure the following software is installed.
+
+### Frontend
+
+- Node.js (18+)
+- npm
+
+### Backend
+
+- Node.js
+- Express.js
+- npm
+
+### Native Engine
+
+- C++17 Compatible Compiler
+- CMake
+- Make
+- GCC / Clang
+
+---
+
+# Clone the Repository
+
+```bash
+git clone https://github.com/MainakDebnath6/PacketAnalyzer.git
+
+cd PacketAnalyzer
 ```
 
 ---
 
-## 2. Networking Background
+# Project Structure
 
-### The Network Stack (Layers)
+```text
+PacketAnalyzer/
 
-When you visit a website, data travels through multiple "layers":
-
+├── frontend/          # React Dashboard
+├── backend/           # Express APIs
+├── cpp-engine/        # Native DPI Engine
+└── README.md
 ```
-┌─────────────────────────────────────────────────────────┐
-│ Layer 7: Application    │ HTTP, TLS, DNS               │
-├─────────────────────────────────────────────────────────┤
-│ Layer 4: Transport      │ TCP (reliable), UDP (fast)   │
-├─────────────────────────────────────────────────────────┤
-│ Layer 3: Network        │ IP addresses (routing)       │
-├─────────────────────────────────────────────────────────┤
-│ Layer 2: Data Link      │ MAC addresses (local network)│
-└─────────────────────────────────────────────────────────┘
-```
-
-### A Packet's Structure
-
-Every network packet is like a **Russian nesting doll** - headers wrapped inside headers:
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ Ethernet Header (14 bytes)                                       │
-│ ┌──────────────────────────────────────────────────────────────┐ │
-│ │ IP Header (20 bytes)                                         │ │
-│ │ ┌──────────────────────────────────────────────────────────┐ │ │
-│ │ │ TCP Header (20 bytes)                                    │ │ │
-│ │ │ ┌──────────────────────────────────────────────────────┐ │ │ │
-│ │ │ │ Payload (Application Data)                           │ │ │ │
-│ │ │ │ e.g., TLS Client Hello with SNI                      │ │ │ │
-│ │ │ └──────────────────────────────────────────────────────┘ │ │ │
-│ │ └──────────────────────────────────────────────────────────┘ │ │
-│ └──────────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### The Five-Tuple
-
-A **connection** (or "flow") is uniquely identified by 5 values:
-
-| Field | Example | Purpose |
-|-------|---------|---------|
-| Source IP | 192.168.1.100 | Who is sending |
-| Destination IP | 172.217.14.206 | Where it's going |
-| Source Port | 54321 | Sender's application identifier |
-| Destination Port | 443 | Service being accessed (443 = HTTPS) |
-| Protocol | TCP (6) | TCP or UDP |
-
-**Why is this important?** 
-- All packets with the same 5-tuple belong to the same connection
-- If we block one packet of a connection, we should block all of them
-- This is how we "track" conversations between computers
-
-### What is SNI?
-
-**Server Name Indication (SNI)** is part of the TLS/HTTPS handshake. When you visit `https://www.youtube.com`:
-
-1. Your browser sends a "Client Hello" message
-2. This message includes the domain name in **plaintext** (not encrypted yet!)
-3. The server uses this to know which certificate to send
-
-```
-TLS Client Hello:
-├── Version: TLS 1.2
-├── Random: [32 bytes]
-├── Cipher Suites: [list]
-└── Extensions:
-    └── SNI Extension:
-        └── Server Name: "www.youtube.com"  ← We extract THIS!
-```
-
-**This is the key to DPI**: Even though HTTPS is encrypted, the domain name is visible in the first packet!
 
 ---
 
-## 3. Project Overview
+# Installing Dependencies
 
-### What This Project Does
+## Frontend
 
+```bash
+cd frontend
+
+npm install
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│ Wireshark   │     │ DPI Engine  │     │ Output      │
-│ Capture     │ ──► │             │ ──► │ PCAP        │
-│ (input.pcap)│     │ - Parse     │     │ (filtered)  │
-└─────────────┘     │ - Classify  │     └─────────────┘
-                    │ - Block     │
-                    │ - Report    │
-                    └─────────────┘
-```
-
-### Two Versions
-
-| Version | File | Use Case |
-|---------|------|----------|
-| Simple (Single-threaded) | `src/main_working.cpp` | Learning, small captures |
-| Multi-threaded | `src/dpi_mt.cpp` | Production, large captures |
 
 ---
 
-## 4. File Structure
+## Backend
 
+```bash
+cd backend
+
+npm install
 ```
-packet_analyzer/
-├── include/                    # Header files (declarations)
-│   ├── pcap_reader.h          # PCAP file reading
-│   ├── packet_parser.h        # Network protocol parsing
-│   ├── sni_extractor.h        # TLS/HTTP inspection
-│   ├── types.h                # Data structures (FiveTuple, AppType, etc.)
-│   ├── rule_manager.h         # Blocking rules (multi-threaded version)
-│   ├── connection_tracker.h   # Flow tracking (multi-threaded version)
-│   ├── load_balancer.h        # LB thread (multi-threaded version)
-│   ├── fast_path.h            # FP thread (multi-threaded version)
-│   ├── thread_safe_queue.h    # Thread-safe queue
-│   └── dpi_engine.h           # Main orchestrator
+
+---
+
+## Build the C++ Engine
+
+```bash
+cd cpp-engine
+
+mkdir build
+
+cd build
+
+cmake ..
+
+make
+```
+
+---
+
+# Running the Project
+
+The application consists of three independent services.
+
+---
+
+## 1. Start the Backend
+
+```bash
+cd backend
+
+npm start
+```
+
+---
+
+## 2. Start the Frontend
+
+```bash
+cd frontend
+
+npm run dev
+```
+
+---
+
+## 3. Run the Native Engine
+
+The backend automatically invokes the C++ engine whenever a PCAP file is uploaded.
+
+If required, it can also be executed manually.
+
+```bash
+./dpi_engine input.pcap output.json
+```
+
+---
+
+# Live Demo
+
+The deployed version of the application is available here.
+
+## 🌐 https://packetanalyzer-frontend.onrender.com
+
+---
+
+# API Overview
+
+| Method | Endpoint | Description |
+|----------|------------------------|--------------------------------|
+| POST | /api/scan/upload | Upload a PCAP file |
+| GET | /api/dashboard | Dashboard statistics |
+| GET | /api/analytics | Traffic analytics |
+| GET | /api/firewall | Current firewall rules |
+| POST | /api/firewall | Add firewall rule |
+| DELETE | /api/firewall | Remove firewall rule |
+| GET | /api/reports | Generated reports |
+
+---
+
+# Performance Characteristics
+
+The platform separates responsibilities across three layers.
+
+| Component | Responsibility |
+|------------|----------------|
+| React | User Interface |
+| Express | API Gateway |
+| C++ | Packet Processing |
+
+This architecture provides several advantages.
+
+- Native packet processing performance
+- Lightweight frontend
+- Modular backend services
+- Easy feature expansion
+- Independent deployment of each component
+
+---
+
+# Current Features
+
+- ✅ PCAP Upload
+- ✅ Packet Parsing
+- ✅ Ethernet Parsing
+- ✅ IPv4 Parsing
+- ✅ TCP Parsing
+- ✅ UDP Parsing
+- ✅ TLS SNI Extraction
+- ✅ Application Detection
+- ✅ Flow Tracking
+- ✅ Firewall Rule Management
+- ✅ Analytics Dashboard
+- ✅ Report Generation
+- ✅ Interactive Web Interface
+
+---
+
+# Future Improvements
+
+The current implementation provides a strong foundation for a production-style packet analysis platform.
+
+Potential future enhancements include:
+
+- Live Packet Capture
+- WebSocket-based Real-time Dashboard
+- IDS / IPS Detection
+- Intrusion Alerts
+- GeoIP Visualization
+- Threat Intelligence Integration
+- Machine Learning Traffic Classification
+- HTTP/3 & QUIC Support
+- User Authentication
+- Role-Based Access Control
+- Docker Deployment
+- Kubernetes Support
+- Prometheus Metrics
+- Grafana Monitoring
+
+---
+
+# Screenshots
+
+## Dashboard
+
+> Add Dashboard Screenshot Here
+
+---
+
+## Analytics
+
+> Add Analytics Screenshot Here
+
+---
+
+## Firewall
+
+> Add Firewall Screenshot Here
+
+---
+
+## Reports
+
+> Add Reports Screenshot Here
+
+---
+
+# Learning Outcomes
+
+This project demonstrates practical knowledge of:
+
+- Computer Networks
+- Deep Packet Inspection
+- TLS Protocol
+- Packet Parsing
+- Flow Tracking
+- Firewall Design
+- Network Analytics
+- React Development
+- Express.js
+- REST APIs
+- C++
+- Multi-threading
+- System Architecture
+- Full Stack Development
+
+---
+
+# Why This Project Matters
+
+This project combines systems programming with modern web development to demonstrate how enterprise network security platforms are built.
+
+Rather than limiting packet analysis to a command-line application, it integrates a high-performance native DPI engine with a full-stack web interface capable of processing, visualizing, and managing network traffic through an intuitive dashboard.
+
+It showcases concepts commonly used in commercial network monitoring and security products while remaining approachable for learning and experimentation.
+
+---
+
+<div align="center">
+
+## ⭐ If you found this project interesting, consider giving it a Star.
+
+Made with ❤️ by **Mainak Debnath**
+
+</div>
+
+## Overall Architecture
+
+```mermaid
+flowchart LR
+
+U([User])
+
+subgraph FE["Frontend (React)"]
+A[Upload PCAP]
+B[Dashboard]
+C[Firewall]
+D[Analytics]
+end
+
+subgraph BE["Backend (Express)"]
+E[REST APIs]
+F[Engine Service]
+end
+
+subgraph DPI["C++ DPI Engine"]
+G[Packet Parser]
+H[Traffic Classifier]
+I[Rule Engine]
+J[Statistics]
+end
+
+U --> A
+
+A --> E
+
+E --> F
+
+F --> G
+
+G --> H
+
+H --> I
+
+I --> J
+
+J --> D
+
+J --> B
+
+C --> E
+```
+
+---
+
+# Packet Journey
+
+Every uploaded PCAP follows the same processing pipeline.
+
+---
+
+## Step 1 — Upload
+
+The user uploads a PCAP capture through the web dashboard.
+
+```text
+PCAP File
+     │
+     ▼
+React Frontend
+```
+
+The frontend validates the file before sending it to the backend using a multipart upload request.
+
+---
+
+## Step 2 — Backend Processing
+
+The Express backend receives the uploaded file.
+
+Instead of analyzing packets itself, it invokes the native C++ DPI Engine.
+
+```text
+Browser
+   │
+   ▼
+Express Server
+   │
+   ▼
+Engine Service
+   │
+   ▼
+C++ DPI Engine
+```
+
+This architecture combines the flexibility of JavaScript with the performance of native C++.
+
+---
+
+## Step 3 — Reading the Capture
+
+The DPI engine reads the PCAP sequentially.
+
+```text
+PCAP File
+   │
+   ▼
+Global Header
+   │
+   ▼
+Packet Header
+   │
+   ▼
+Packet Payload
+   │
+   ▼
+Next Packet
+```
+
+Each packet is loaded into memory before being passed to the parser.
+
+---
+
+## Step 4 — Packet Parsing
+
+Every packet is decoded layer by layer.
+
+```mermaid
+flowchart TD
+
+A[Ethernet Frame]
+
+B[IPv4 Header]
+
+C[TCP / UDP Header]
+
+D[Payload]
+
+E[Application Data]
+
+A --> B
+B --> C
+C --> D
+D --> E
+```
+
+The parser extracts:
+
+- Source MAC
+- Destination MAC
+- Source IP
+- Destination IP
+- Source Port
+- Destination Port
+- Protocol
+- Payload
+
+These fields become the foundation for traffic analysis.
+
+---
+
+## Step 5 — Flow Identification
+
+Packets are grouped into **network flows** using the Five Tuple.
+
+| Field | Description |
+|--------|-------------|
+| Source IP | Client Address |
+| Destination IP | Server Address |
+| Source Port | Client Port |
+| Destination Port | Server Port |
+| Protocol | TCP / UDP |
+
+All packets sharing the same Five Tuple belong to the same connection.
+
+---
+
+## Step 6 — Deep Packet Inspection
+
+After parsing the transport layer, the engine performs Deep Packet Inspection (DPI).
+
+Instead of relying only on IP addresses and ports, the engine examines protocol metadata to identify the application responsible for the traffic.
+
+Supported classifications include:
+
+- HTTP
+- HTTPS
+- DNS
+- Google
+- YouTube
+- Facebook
+- GitHub
+
+For HTTPS traffic, the engine extracts the **TLS Server Name Indication (SNI)** from the Client Hello packet, allowing application identification without decrypting encrypted traffic.
+
+---
+
+## Step 7 — Traffic Classification
+
+The extracted SNI is mapped to an application.
+
+```text
+TLS Client Hello
+        │
+        ▼
+Extract SNI
+        │
+        ▼
+www.youtube.com
+        │
+        ▼
+Application = YouTube
+```
+
+Once a flow has been classified, every subsequent packet belonging to that flow inherits the same classification.
+
+---
+
+## Step 8 — Firewall Evaluation
+
+Each classified flow is checked against the configured firewall policies.
+
+The engine evaluates:
+
+- Blocked Applications
+- Blocked Domains
+- Blocked IP Addresses
+
+```mermaid
+flowchart TD
+
+A[Flow]
+
+B{Rule Match?}
+
+C[Forward]
+
+D[Block]
+
+A --> B
+
+B -- No --> C
+
+B -- Yes --> D
+```
+
+If any rule matches, the flow is blocked; otherwise it continues to the analytics engine.
+
+---
+
+## Step 9 — Analytics Generation
+
+Every processed packet contributes to live statistics such as:
+
+- Total Packets
+- TCP / UDP Distribution
+- Application Breakdown
+- Traffic Volume
+- Active Connections
+- Blocked Traffic
+- Detected Domains
+
+These statistics are converted into structured JSON before being returned to the backend.
+
+---
+
+## Step 10 — Dashboard Visualization
+
+The backend sends the processed analytics to the frontend.
+
+The React dashboard renders:
+
+- Interactive Charts
+- Traffic Statistics
+- Firewall Status
+- Application Breakdown
+- Reports
+- Packet Summaries
+
+This transforms raw network captures into an easy-to-understand visual analysis platform.
+
+---
+
+# Project Structure
+
+```text
+packet-analyzer/
+
+├── frontend/
+│   ├── Dashboard
+│   ├── Upload
+│   ├── Analytics
+│   ├── Firewall
+│   └── Reports
 │
-├── src/                        # Implementation files
-│   ├── pcap_reader.cpp        # PCAP file handling
-│   ├── packet_parser.cpp      # Protocol parsing
-│   ├── sni_extractor.cpp      # SNI/Host extraction
-│   ├── types.cpp              # Helper functions
-│   ├── main_working.cpp       # ★ SIMPLE VERSION ★
-│   ├── dpi_mt.cpp             # ★ MULTI-THREADED VERSION ★
-│   └── [other files]          # Supporting code
+├── backend/
+│   ├── REST APIs
+│   ├── Engine Service
+│   ├── Upload Service
+│   ├── Analytics Service
+│   └── Firewall Service
 │
-├── generate_test_pcap.py      # Creates test data
-├── test_dpi.pcap              # Sample capture with various traffic
-└── README.md                  # This file!
+└── cpp-engine/
+    ├── PCAP Reader
+    ├── Packet Parser
+    ├── Flow Tracker
+    ├── SNI Extractor
+    ├── Rule Manager
+    └── Statistics Engine
+```
+
+Each module has a dedicated responsibility, making the project modular, maintainable, and easy to scale as new features are introduced.
+
+# Frontend Architecture
+
+The frontend serves as the primary interface between the user and the Deep Packet Inspection platform. Built with **React** and **Vite**, it provides a responsive dashboard for uploading packet captures, configuring firewall rules, and exploring analytics generated by the C++ engine.
+
+Rather than performing packet analysis inside the browser, the frontend communicates exclusively with the backend through REST APIs, keeping the client lightweight while allowing the backend to handle processing-intensive tasks.
+
+---
+
+## Frontend Architecture
+
+```mermaid
+flowchart LR
+
+User((User))
+
+subgraph React Application
+
+Upload[Upload Page]
+
+Dashboard[Dashboard]
+
+Analytics[Analytics]
+
+Firewall[Firewall Rules]
+
+Reports[Reports]
+
+end
+
+API[REST API]
+
+User --> Upload
+
+User --> Dashboard
+
+User --> Analytics
+
+User --> Firewall
+
+User --> Reports
+
+Upload --> API
+
+Dashboard --> API
+
+Analytics --> API
+
+Firewall --> API
+
+Reports --> API
 ```
 
 ---
 
-## 5. The Journey of a Packet (Simple Version)
+## Frontend Responsibilities
 
-Let's trace a single packet through `main_working.cpp`:
+The frontend is responsible for:
 
-### Step 1: Read PCAP File
+- Uploading PCAP files
+- Displaying network statistics
+- Visualizing protocol distributions
+- Managing firewall rules
+- Displaying detected applications
+- Viewing generated reports
+- Consuming backend APIs
+- Presenting packet inspection results
 
-```cpp
-PcapReader reader;
-reader.open("capture.pcap");
-```
+It does **not** perform any packet parsing or traffic analysis itself.
 
-**What happens:**
-1. Open the file in binary mode
-2. Read the 24-byte global header (magic number, version, etc.)
-3. Verify it's a valid PCAP file
+---
 
-**PCAP File Format:**
-```
-┌────────────────────────────┐
-│ Global Header (24 bytes)   │  ← Read once at start
-├────────────────────────────┤
-│ Packet Header (16 bytes)   │  ← Timestamp, length
-│ Packet Data (variable)     │  ← Actual network bytes
-├────────────────────────────┤
-│ Packet Header (16 bytes)   │
-│ Packet Data (variable)     │
-├────────────────────────────┤
-│ ... more packets ...       │
-└────────────────────────────┘
-```
+# Backend Architecture
 
-### Step 2: Read Each Packet
+The backend acts as the central controller of the platform.
 
-```cpp
-while (reader.readNextPacket(raw)) {
-    // raw.data contains the packet bytes
-    // raw.header contains timestamp and length
-}
-```
+It receives requests from the frontend, manages uploaded captures, invokes the native C++ DPI engine, processes generated output, and exposes the results through REST APIs.
 
-**What happens:**
-1. Read 16-byte packet header
-2. Read N bytes of packet data (N = header.incl_len)
-3. Return false when no more packets
+This design keeps the React application simple while leveraging the performance of native code.
 
-### Step 3: Parse Protocol Headers
+---
 
-```cpp
-PacketParser::parse(raw, parsed);
-```
+## Backend Workflow
 
-**What happens (in packet_parser.cpp):**
+```mermaid
+flowchart TD
 
-```
-raw.data bytes:
-[0-13]   Ethernet Header
-[14-33]  IP Header  
-[34-53]  TCP Header
-[54+]    Payload
+Client[React Client]
 
-After parsing:
-parsed.src_mac  = "00:11:22:33:44:55"
-parsed.dest_mac = "aa:bb:cc:dd:ee:ff"
-parsed.src_ip   = "192.168.1.100"
-parsed.dest_ip  = "172.217.14.206"
-parsed.src_port = 54321
-parsed.dest_port = 443
-parsed.protocol = 6 (TCP)
-parsed.has_tcp  = true
-```
+UploadAPI[Upload API]
 
-**Parsing the Ethernet Header (14 bytes):**
-```
-Bytes 0-5:   Destination MAC
-Bytes 6-11:  Source MAC
-Bytes 12-13: EtherType (0x0800 = IPv4)
-```
+EngineService[Engine Service]
 
-**Parsing the IP Header (20+ bytes):**
-```
-Byte 0:      Version (4 bits) + Header Length (4 bits)
-Byte 8:      TTL (Time To Live)
-Byte 9:      Protocol (6=TCP, 17=UDP)
-Bytes 12-15: Source IP
-Bytes 16-19: Destination IP
-```
+CPP[C++ DPI Engine]
 
-**Parsing the TCP Header (20+ bytes):**
-```
-Bytes 0-1:   Source Port
-Bytes 2-3:   Destination Port
-Bytes 4-7:   Sequence Number
-Bytes 8-11:  Acknowledgment Number
-Byte 12:     Data Offset (header length)
-Byte 13:     Flags (SYN, ACK, FIN, etc.)
-```
+Parser[Result Parser]
 
-### Step 4: Create Five-Tuple and Look Up Flow
+Analytics[Analytics API]
 
-```cpp
-FiveTuple tuple;
-tuple.src_ip = parseIP(parsed.src_ip);
-tuple.dst_ip = parseIP(parsed.dest_ip);
-tuple.src_port = parsed.src_port;
-tuple.dst_port = parsed.dest_port;
-tuple.protocol = parsed.protocol;
+Firewall[Firewall API]
 
-Flow& flow = flows[tuple];  // Get or create
-```
+Reports[Reports API]
 
-**What happens:**
-- The flow table is a hash map: `FiveTuple → Flow`
-- If this 5-tuple exists, we get the existing flow
-- If not, a new flow is created
-- All packets with the same 5-tuple share the same flow
+Client --> UploadAPI
 
-### Step 5: Extract SNI (Deep Packet Inspection)
+UploadAPI --> EngineService
 
-```cpp
-// For HTTPS traffic (port 443)
-if (pkt.tuple.dst_port == 443 && pkt.payload_length > 5) {
-    auto sni = SNIExtractor::extract(payload, payload_length);
-    if (sni) {
-        flow.sni = *sni;                    // "www.youtube.com"
-        flow.app_type = sniToAppType(*sni); // AppType::YOUTUBE
-    }
-}
-```
+EngineService --> CPP
 
-**What happens (in sni_extractor.cpp):**
+CPP --> Parser
 
-1. **Check if it's a TLS Client Hello:**
-   ```
-   Byte 0: Content Type = 0x16 (Handshake) ✓
-   Byte 5: Handshake Type = 0x01 (Client Hello) ✓
-   ```
+Parser --> Analytics
 
-2. **Navigate to Extensions:**
-   ```
-   Skip: Version, Random, Session ID, Cipher Suites, Compression
-   ```
+Parser --> Firewall
 
-3. **Find SNI Extension (type 0x0000):**
-   ```
-   Extension Type: 0x0000 (SNI)
-   Extension Length: N
-   SNI List Length: M
-   SNI Type: 0x00 (hostname)
-   SNI Length: L
-   SNI Value: "www.youtube.com"  ← FOUND!
-   ```
+Parser --> Reports
 
-4. **Map SNI to App Type:**
-   ```cpp
-   // In types.cpp
-   if (sni.find("youtube") != std::string::npos) {
-       return AppType::YOUTUBE;
-   }
-   ```
+Analytics --> Client
 
-### Step 6: Check Blocking Rules
+Firewall --> Client
 
-```cpp
-if (rules.isBlocked(tuple.src_ip, flow.app_type, flow.sni)) {
-    flow.blocked = true;
-}
-```
-
-**What happens:**
-```cpp
-// Check IP blacklist
-if (blocked_ips.count(src_ip)) return true;
-
-// Check app blacklist
-if (blocked_apps.count(app)) return true;
-
-// Check domain blacklist (substring match)
-for (const auto& dom : blocked_domains) {
-    if (sni.find(dom) != std::string::npos) return true;
-}
-
-return false;
-```
-
-### Step 7: Forward or Drop
-
-```cpp
-if (flow.blocked) {
-    dropped++;
-    // Don't write to output
-} else {
-    forwarded++;
-    // Write packet to output file
-    output.write(packet_header);
-    output.write(packet_data);
-}
-```
-
-### Step 8: Generate Report
-
-After processing all packets:
-```cpp
-// Count apps
-for (const auto& [tuple, flow] : flows) {
-    app_stats[flow.app_type]++;
-}
-
-// Print report
-"YouTube: 150 packets (15%)"
-"Facebook: 80 packets (8%)"
-...
+Reports --> Client
 ```
 
 ---
 
-## 6. The Journey of a Packet (Multi-threaded Version)
+## Backend Responsibilities
 
-The multi-threaded version (`dpi_mt.cpp`) adds **parallelism** for high performance:
+The backend is responsible for:
 
-### Architecture Overview
-
-```
-                    ┌─────────────────┐
-                    │  Reader Thread  │
-                    │  (reads PCAP)   │
-                    └────────┬────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              │      hash(5-tuple) % 2      │
-              ▼                             ▼
-    ┌─────────────────┐           ┌─────────────────┐
-    │  LB0 Thread     │           │  LB1 Thread     │
-    │  (Load Balancer)│           │  (Load Balancer)│
-    └────────┬────────┘           └────────┬────────┘
-             │                             │
-      ┌──────┴──────┐               ┌──────┴──────┐
-      │hash % 2     │               │hash % 2     │
-      ▼             ▼               ▼             ▼
-┌──────────┐ ┌──────────┐   ┌──────────┐ ┌──────────┐
-│FP0 Thread│ │FP1 Thread│   │FP2 Thread│ │FP3 Thread│
-│(Fast Path)│ │(Fast Path)│   │(Fast Path)│ │(Fast Path)│
-└─────┬────┘ └─────┬────┘   └─────┬────┘ └─────┬────┘
-      │            │              │            │
-      └────────────┴──────────────┴────────────┘
-                          │
-                          ▼
-              ┌───────────────────────┐
-              │   Output Queue        │
-              └───────────┬───────────┘
-                          │
-                          ▼
-              ┌───────────────────────┐
-              │  Output Writer Thread │
-              │  (writes to PCAP)     │
-              └───────────────────────┘
-```
-
-### Why This Design?
-
-1. **Load Balancers (LBs):** Distribute work across FPs
-2. **Fast Paths (FPs):** Do the actual DPI processing
-3. **Consistent Hashing:** Same 5-tuple always goes to same FP
-
-**Why consistent hashing matters:**
-```
-Connection: 192.168.1.100:54321 → 142.250.185.206:443
-
-Packet 1 (SYN):         hash → FP2
-Packet 2 (SYN-ACK):     hash → FP2  (same FP!)
-Packet 3 (Client Hello): hash → FP2  (same FP!)
-Packet 4 (Data):        hash → FP2  (same FP!)
-
-All packets of this connection go to FP2.
-FP2 can track the flow state correctly.
-```
-
-### Detailed Flow
-
-#### Step 1: Reader Thread
-
-```cpp
-// Main thread reads PCAP
-while (reader.readNextPacket(raw)) {
-    Packet pkt = createPacket(raw);
-    
-    // Hash to select Load Balancer
-    size_t lb_idx = hash(pkt.tuple) % num_lbs;
-    
-    // Push to LB's queue
-    lbs_[lb_idx]->queue().push(pkt);
-}
-```
-
-#### Step 2: Load Balancer Thread
-
-```cpp
-void LoadBalancer::run() {
-    while (running_) {
-        // Pop from my input queue
-        auto pkt = input_queue_.pop();
-        
-        // Hash to select Fast Path
-        size_t fp_idx = hash(pkt.tuple) % num_fps_;
-        
-        // Push to FP's queue
-        fps_[fp_idx]->queue().push(pkt);
-    }
-}
-```
-
-#### Step 3: Fast Path Thread
-
-```cpp
-void FastPath::run() {
-    while (running_) {
-        // Pop from my input queue
-        auto pkt = input_queue_.pop();
-        
-        // Look up flow (each FP has its own flow table)
-        Flow& flow = flows_[pkt.tuple];
-        
-        // Classify (SNI extraction)
-        classifyFlow(pkt, flow);
-        
-        // Check rules
-        if (rules_->isBlocked(pkt.tuple.src_ip, flow.app_type, flow.sni)) {
-            stats_->dropped++;
-        } else {
-            // Forward: push to output queue
-            output_queue_->push(pkt);
-        }
-    }
-}
-```
-
-#### Step 4: Output Writer Thread
-
-```cpp
-void outputThread() {
-    while (running_ || output_queue_.size() > 0) {
-        auto pkt = output_queue_.pop();
-        
-        // Write to output file
-        output_file.write(packet_header);
-        output_file.write(pkt.data);
-    }
-}
-```
-
-### Thread-Safe Queue
-
-The magic that makes multi-threading work:
-
-```cpp
-template<typename T>
-class TSQueue {
-    std::queue<T> queue_;
-    std::mutex mutex_;
-    std::condition_variable not_empty_;
-    std::condition_variable not_full_;
-    
-    void push(T item) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        queue_.push(item);
-        not_empty_.notify_one();  // Wake up waiting consumer
-    }
-    
-    T pop() {
-        std::unique_lock<std::mutex> lock(mutex_);
-        not_empty_.wait(lock, [&]{ return !queue_.empty(); });
-        T item = queue_.front();
-        queue_.pop();
-        return item;
-    }
-};
-```
-
-**How it works:**
-- `push()`: Producer adds item, signals waiting consumers
-- `pop()`: Consumer waits until item available, then takes it
-- `mutex`: Only one thread can access at a time
-- `condition_variable`: Efficient waiting (no busy-loop)
+- Receiving uploaded PCAP files
+- Validating requests
+- Managing temporary storage
+- Executing the C++ engine
+- Reading generated output
+- Returning structured JSON
+- Managing firewall configuration
+- Serving analytics data
+- Generating reports
 
 ---
 
-## 7. Deep Dive: Each Component
+# API Communication
 
-### pcap_reader.h / pcap_reader.cpp
+The React application communicates with the backend using REST APIs.
 
-**Purpose:** Read network captures saved by Wireshark
+```mermaid
+sequenceDiagram
 
-**Key structures:**
-```cpp
-struct PcapGlobalHeader {
-    uint32_t magic_number;   // 0xa1b2c3d4 identifies PCAP
-    uint16_t version_major;  // Usually 2
-    uint16_t version_minor;  // Usually 4
-    uint32_t snaplen;        // Max packet size captured
-    uint32_t network;        // 1 = Ethernet
-};
+participant User
 
-struct PcapPacketHeader {
-    uint32_t ts_sec;         // Timestamp (seconds)
-    uint32_t ts_usec;        // Timestamp (microseconds)
-    uint32_t incl_len;       // Bytes saved in file
-    uint32_t orig_len;       // Original packet size
-};
+participant React
+
+participant Express
+
+participant DPI
+
+User->>React: Upload PCAP
+
+React->>Express: POST /upload
+
+Express->>DPI: Execute Analysis
+
+DPI-->>Express: Analysis Result
+
+Express-->>React: JSON Response
+
+React-->>User: Render Dashboard
 ```
 
-**Key functions:**
-- `open(filename)`: Open PCAP, validate header
-- `readNextPacket(raw)`: Read next packet into buffer
-- `close()`: Clean up
+Every operation follows the same lifecycle:
 
-### packet_parser.h / packet_parser.cpp
-
-**Purpose:** Extract protocol fields from raw bytes
-
-**Key function:**
-```cpp
-bool PacketParser::parse(const RawPacket& raw, ParsedPacket& parsed) {
-    parseEthernet(...);  // Extract MACs, EtherType
-    parseIPv4(...);      // Extract IPs, protocol, TTL
-    parseTCP(...);       // Extract ports, flags, seq numbers
-    // OR
-    parseUDP(...);       // Extract ports
-}
-```
-
-**Important concepts:**
-
-*Network Byte Order:* Network protocols use big-endian (most significant byte first). Your computer might use little-endian. We use `ntohs()` and `ntohl()` to convert:
-```cpp
-// ntohs = Network TO Host Short (16-bit)
-uint16_t port = ntohs(*(uint16_t*)(data + offset));
-
-// ntohl = Network TO Host Long (32-bit)
-uint32_t seq = ntohl(*(uint32_t*)(data + offset));
-```
-
-### sni_extractor.h / sni_extractor.cpp
-
-**Purpose:** Extract domain names from TLS and HTTP
-
-**For TLS (HTTPS):**
-```cpp
-std::optional<std::string> SNIExtractor::extract(
-    const uint8_t* payload, 
-    size_t length
-) {
-    // 1. Verify TLS record header
-    // 2. Verify Client Hello handshake
-    // 3. Skip to extensions
-    // 4. Find SNI extension (type 0x0000)
-    // 5. Extract hostname string
-}
-```
-
-**For HTTP:**
-```cpp
-std::optional<std::string> HTTPHostExtractor::extract(
-    const uint8_t* payload,
-    size_t length
-) {
-    // 1. Verify HTTP request (GET, POST, etc.)
-    // 2. Search for "Host: " header
-    // 3. Extract value until newline
-}
-```
-
-### types.h / types.cpp
-
-**Purpose:** Define data structures used throughout
-
-**FiveTuple:**
-```cpp
-struct FiveTuple {
-    uint32_t src_ip;
-    uint32_t dst_ip;
-    uint16_t src_port;
-    uint16_t dst_port;
-    uint8_t  protocol;
-    
-    bool operator==(const FiveTuple& other) const;
-};
-```
-
-**AppType:**
-```cpp
-enum class AppType {
-    UNKNOWN,
-    HTTP,
-    HTTPS,
-    DNS,
-    GOOGLE,
-    YOUTUBE,
-    FACEBOOK,
-    // ... more apps
-};
-```
-
-**sniToAppType function:**
-```cpp
-AppType sniToAppType(const std::string& sni) {
-    if (sni.find("youtube") != std::string::npos) 
-        return AppType::YOUTUBE;
-    if (sni.find("facebook") != std::string::npos) 
-        return AppType::FACEBOOK;
-    // ... more patterns
-}
-```
+1. The user performs an action through the interface.
+2. React sends an HTTP request.
+3. Express validates the request.
+4. The backend executes the required service.
+5. The C++ engine performs packet inspection.
+6. Results are converted into JSON.
+7. React updates the dashboard.
 
 ---
 
-## 8. How SNI Extraction Works
+# Core Frontend Modules
 
-### The TLS Handshake
+## Upload Module
 
-When you visit `https://www.youtube.com`:
+The upload module allows users to submit PCAP files for analysis.
 
-```
-┌──────────┐                              ┌──────────┐
-│  Browser │                              │  Server  │
-└────┬─────┘                              └────┬─────┘
-     │                                         │
-     │ ──── Client Hello ─────────────────────►│
-     │      (includes SNI: www.youtube.com)    │
-     │                                         │
-     │ ◄─── Server Hello ───────────────────── │
-     │      (includes certificate)             │
-     │                                         │
-     │ ──── Key Exchange ─────────────────────►│
-     │                                         │
-     │ ◄═══ Encrypted Data ══════════════════► │
-     │      (from here on, everything is       │
-     │       encrypted - we can't see it)      │
-```
+Responsibilities:
 
-**We can only extract SNI from the Client Hello!**
-
-### TLS Client Hello Structure
-
-```
-Byte 0:     Content Type = 0x16 (Handshake)
-Bytes 1-2:  Version = 0x0301 (TLS 1.0)
-Bytes 3-4:  Record Length
-
--- Handshake Layer --
-Byte 5:     Handshake Type = 0x01 (Client Hello)
-Bytes 6-8:  Handshake Length
-
--- Client Hello Body --
-Bytes 9-10:  Client Version
-Bytes 11-42: Random (32 bytes)
-Byte 43:     Session ID Length (N)
-Bytes 44 to 44+N: Session ID
-... Cipher Suites ...
-... Compression Methods ...
-
--- Extensions --
-Bytes X-X+1: Extensions Length
-For each extension:
-    Bytes: Extension Type (2)
-    Bytes: Extension Length (2)
-    Bytes: Extension Data
-
--- SNI Extension (Type 0x0000) --
-Extension Type: 0x0000
-Extension Length: L
-  SNI List Length: M
-  SNI Type: 0x00 (hostname)
-  SNI Length: K
-  SNI Value: "www.youtube.com" ← THE GOAL!
-```
-
-### Our Extraction Code (Simplified)
-
-```cpp
-std::optional<std::string> SNIExtractor::extract(
-    const uint8_t* payload, size_t length
-) {
-    // Check TLS record header
-    if (payload[0] != 0x16) return std::nullopt;  // Not handshake
-    if (payload[5] != 0x01) return std::nullopt;  // Not Client Hello
-    
-    size_t offset = 43;  // Skip to session ID
-    
-    // Skip Session ID
-    uint8_t session_len = payload[offset];
-    offset += 1 + session_len;
-    
-    // Skip Cipher Suites
-    uint16_t cipher_len = readUint16BE(payload + offset);
-    offset += 2 + cipher_len;
-    
-    // Skip Compression Methods
-    uint8_t comp_len = payload[offset];
-    offset += 1 + comp_len;
-    
-    // Read Extensions Length
-    uint16_t ext_len = readUint16BE(payload + offset);
-    offset += 2;
-    
-    // Search for SNI extension
-    size_t ext_end = offset + ext_len;
-    while (offset + 4 <= ext_end) {
-        uint16_t ext_type = readUint16BE(payload + offset);
-        uint16_t ext_data_len = readUint16BE(payload + offset + 2);
-        offset += 4;
-        
-        if (ext_type == 0x0000) {  // SNI!
-            // Parse SNI structure
-            uint16_t sni_len = readUint16BE(payload + offset + 3);
-            return std::string(
-                (char*)(payload + offset + 5), 
-                sni_len
-            );
-        }
-        
-        offset += ext_data_len;
-    }
-    
-    return std::nullopt;  // SNI not found
-}
-```
+- File selection
+- File validation
+- Upload progress
+- Error handling
+- Triggering backend analysis
 
 ---
 
-## 9. How Blocking Works
+## Dashboard Module
 
-### Rule Types
+The dashboard provides an overview of the processed capture.
 
-| Rule Type | Example | What it Blocks |
-|-----------|---------|----------------|
-| IP | `192.168.1.50` | All traffic from this source |
-| App | `YouTube` | All YouTube connections |
-| Domain | `tiktok` | Any SNI containing "tiktok" |
+Typical information includes:
 
-### The Blocking Flow
-
-```
-Packet arrives
-      │
-      ▼
-┌─────────────────────────────────┐
-│ Is source IP in blocked list?  │──Yes──► DROP
-└───────────────┬─────────────────┘
-                │No
-                ▼
-┌─────────────────────────────────┐
-│ Is app type in blocked list?   │──Yes──► DROP
-└───────────────┬─────────────────┘
-                │No
-                ▼
-┌─────────────────────────────────┐
-│ Does SNI match blocked domain? │──Yes──► DROP
-└───────────────┬─────────────────┘
-                │No
-                ▼
-            FORWARD
-```
-
-### Flow-Based Blocking
-
-**Important:** We block at the *flow* level, not packet level.
-
-```
-Connection to YouTube:
-  Packet 1 (SYN)           → No SNI yet, FORWARD
-  Packet 2 (SYN-ACK)       → No SNI yet, FORWARD  
-  Packet 3 (ACK)           → No SNI yet, FORWARD
-  Packet 4 (Client Hello)  → SNI: www.youtube.com
-                           → App: YOUTUBE (blocked!)
-                           → Mark flow as BLOCKED
-                           → DROP this packet
-  Packet 5 (Data)          → Flow is BLOCKED → DROP
-  Packet 6 (Data)          → Flow is BLOCKED → DROP
-  ...all subsequent packets → DROP
-```
-
-**Why this approach?**
-- We can't identify the app until we see the Client Hello
-- Once identified, we block all future packets of that flow
-- The connection will fail/timeout on the client
+- Total Packets
+- Active Flows
+- Blocked Packets
+- Allowed Packets
+- Detected Applications
+- Protocol Distribution
 
 ---
 
-## 10. Building and Running
+## Analytics Module
 
-### Prerequisites
+The analytics section transforms raw statistics into meaningful visualizations.
 
-- **macOS/Linux** with C++17 compiler
-- **g++** or **clang++**
-- No external libraries needed!
+Examples include:
 
-### Build Commands
+- Protocol distribution
+- Traffic composition
+- Application usage
+- Packet counts
+- Traffic trends
 
-**Simple Version:**
-```bash
-g++ -std=c++17 -O2 -I include -o dpi_simple \
-    src/main_working.cpp \
-    src/pcap_reader.cpp \
-    src/packet_parser.cpp \
-    src/sni_extractor.cpp \
-    src/types.cpp
-```
-
-**Multi-threaded Version:**
-```bash
-g++ -std=c++17 -pthread -O2 -I include -o dpi_engine \
-    src/dpi_mt.cpp \
-    src/pcap_reader.cpp \
-    src/packet_parser.cpp \
-    src/sni_extractor.cpp \
-    src/types.cpp
-```
-
-### Running
-
-**Basic usage:**
-```bash
-./dpi_engine test_dpi.pcap output.pcap
-```
-
-**With blocking:**
-```bash
-./dpi_engine test_dpi.pcap output.pcap \
-    --block-app YouTube \
-    --block-app TikTok \
-    --block-ip 192.168.1.50 \
-    --block-domain facebook
-```
-
-**Configure threads (multi-threaded only):**
-```bash
-./dpi_engine input.pcap output.pcap --lbs 4 --fps 4
-# Creates 4 LB threads × 4 FP threads = 16 processing threads
-```
-
-### Creating Test Data
-
-```bash
-python3 generate_test_pcap.py
-# Creates test_dpi.pcap with sample traffic
-```
+The goal is to make large packet captures easy to interpret.
 
 ---
 
-## 11. Understanding the Output
+## Firewall Module
 
-### Sample Output
+The firewall interface allows users to configure filtering policies without interacting directly with the native engine.
+
+Supported rule types include:
+
+- Block IP Address
+- Block Domain
+- Block Application
+
+Once a rule is created, it is forwarded to the backend and enforced during packet inspection.
+
+---
+
+## Reports Module
+
+The reporting module presents the final inspection results.
+
+Reports summarize:
+
+- Traffic overview
+- Protocol statistics
+- Application breakdown
+- Blocked traffic
+- Detected domains
+- Firewall activity
+
+This enables users to quickly understand what occurred during network analysis.
+
+---
+
+# Why Use a Separate Backend?
+
+Keeping the React frontend independent from the packet inspection engine provides several advantages.
+
+- Better scalability
+- Easier maintenance
+- Improved security
+- Native execution speed
+- Clear separation of concerns
+- Simplified frontend logic
+
+The backend becomes the bridge between the web interface and the high-performance C++ analysis engine, allowing each component to focus on a single responsibility.
+
+# Inside the C++ DPI Engine
+
+The C++ engine is the computational core of the Packet Analyzer Platform.
+
+While the React frontend provides visualization and the Express backend manages API communication, every packet is ultimately analyzed inside the native engine.
+
+The engine is responsible for:
+
+- Reading PCAP files
+- Parsing network packets
+- Tracking network flows
+- Extracting TLS Server Name Indication (SNI)
+- Classifying applications
+- Applying firewall rules
+- Generating analytics
+- Returning structured results to the backend
+
+---
+
+# DPI Engine Pipeline
+
+```mermaid
+flowchart LR
+
+A["PCAP Reader"]
+B["Packet Parser"]
+C["Flow Tracker"]
+D["SNI Extractor"]
+E["Traffic Classifier"]
+F["Firewall Engine"]
+G["Statistics Engine"]
+H["JSON Output"]
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+F --> G
+G --> H
+```
+
+Every uploaded capture passes through this processing pipeline before results are returned to the web application.
+
+---
+
+# PCAP Reader
+
+The first stage of processing is reading packets from the uploaded PCAP capture.
+
+A PCAP file stores captured network packets together with metadata such as timestamps and packet lengths.
+
+```text
+PCAP File
+
+├── Global Header
+
+├── Packet Header
+
+├── Packet Data
+
+├── Packet Header
+
+├── Packet Data
+
+└── ...
+```
+
+The reader performs the following tasks:
+
+- Opens the capture
+- Reads packet headers
+- Reads raw packet bytes
+- Preserves timestamps
+- Passes packets to the parser
+
+At this point the engine still sees packets as raw binary data.
+
+---
+
+# Packet Parser
+
+The parser converts raw bytes into structured networking information.
+
+Each packet is decoded layer by layer.
+
+```mermaid
+flowchart TD
+
+A["Ethernet Header"]
+
+B["IPv4 Header"]
+
+C["TCP / UDP Header"]
+
+D["Payload"]
+
+A --> B
+B --> C
+C --> D
+```
+
+The parser extracts
+
+- Source MAC
+- Destination MAC
+- Source IP
+- Destination IP
+- Source Port
+- Destination Port
+- Protocol
+- Packet Length
+- Payload Offset
+
+These values become the foundation for every subsequent processing stage.
+
+---
+
+# Flow Tracking
+
+Instead of processing every packet independently, packets are grouped into network flows.
+
+Each flow is uniquely identified using the **Five Tuple**.
+
+| Field | Description |
+|--------|-------------|
+| Source IP | Client Address |
+| Destination IP | Server Address |
+| Source Port | Client Port |
+| Destination Port | Server Port |
+| Protocol | TCP / UDP |
+
+Grouping packets into flows allows the engine to:
+
+- Track long-running connections
+- Remember application classifications
+- Apply firewall decisions consistently
+- Generate accurate traffic statistics
+
+---
+
+# TLS SNI Extraction
+
+Most modern internet traffic is encrypted using HTTPS.
+
+Although encrypted payloads cannot be inspected directly, the TLS handshake still exposes the requested hostname through the **Server Name Indication (SNI)** field.
+
+```text
+TLS Client Hello
+
+↓
+
+Server Name Indication
+
+↓
+
+www.youtube.com
+
+↓
+
+Application = YouTube
+```
+
+By extracting the SNI, the engine can identify applications without decrypting user traffic.
+
+---
+
+# Traffic Classification
+
+Once the protocol metadata has been extracted, each flow is mapped to a known application.
+
+Examples include:
+
+- HTTP
+- HTTPS
+- DNS
+- Google
+- GitHub
+- Facebook
+- YouTube
+- Unknown
+
+This allows the dashboard to display meaningful application analytics instead of raw IP addresses.
+
+---
+
+# Firewall Engine
+
+After classification, every flow is evaluated against configured firewall rules.
+
+```mermaid
+flowchart TD
+
+A["Incoming Flow"]
+
+B["Traffic Classification"]
+
+C{"Rule Matched?"}
+
+D["Allow"]
+
+E["Block"]
+
+A --> B
+B --> C
+
+C -- No --> D
+C -- Yes --> E
+```
+
+The engine currently supports:
+
+- IP-based blocking
+- Domain-based blocking
+- Application-based blocking
+
+Matching traffic is dropped while allowed traffic continues to the analytics engine.
+
+---
+
+# Statistics Engine
+
+Every processed packet contributes to live traffic statistics.
+
+Examples include:
+
+- Total Packets
+- Total Bytes
+- TCP Traffic
+- UDP Traffic
+- Active Connections
+- Blocked Packets
+- Allowed Packets
+- Protocol Distribution
+- Application Distribution
+- Detected Domains
+
+These statistics are continuously aggregated during processing.
+
+---
+
+# Returning Results
+
+Once analysis is complete, the engine exports structured results to the backend.
+
+```mermaid
+flowchart LR
+
+A["Packet Processing"]
+
+B["Statistics"]
+
+C["JSON Result"]
+
+D["Express Backend"]
+
+E["React Dashboard"]
+
+A --> B
+B --> C
+C --> D
+D --> E
+```
+
+The backend parses the generated output and exposes it through REST APIs, allowing the frontend to render dashboards, reports, analytics, and firewall summaries.
+
+---
+
+# Why Use C++?
+
+Packet inspection is computationally expensive.
+
+Using C++ allows the engine to process captures significantly faster than an interpreted implementation while maintaining low memory usage.
+
+Key advantages include:
+
+- Native execution speed
+- Efficient memory management
+- High-performance packet parsing
+- Better scalability for large PCAP files
+- Easy integration with the web backend
+
+This separation between the web application and the native processing engine closely mirrors the architecture used in enterprise network security products.
+
+# Understanding Deep Packet Inspection (DPI)
+
+Deep Packet Inspection (DPI) is a network analysis technique that examines not only packet headers but also the payload and protocol metadata carried inside each packet.
+
+Unlike a traditional firewall that makes decisions using only IP addresses and ports, DPI can identify **which application generated the traffic**, **what services are being accessed**, and **whether that traffic should be allowed or blocked**.
+
+This project demonstrates how a production-style DPI engine works internally while integrating it with a modern web dashboard.
+
+---
+
+# Traditional Firewall vs Deep Packet Inspection
+
+| Traditional Firewall | Deep Packet Inspection |
+|----------------------|-------------------------|
+| Checks IP Addresses | Inspects packet contents |
+| Checks Ports | Identifies Applications |
+| Checks Protocol | Extracts TLS Metadata |
+| Limited Visibility | Detailed Traffic Analysis |
+| Basic Filtering | Intelligent Classification |
+
+For example,
+
+A traditional firewall only sees
 
 ```
-╔══════════════════════════════════════════════════════════════╗
-║              DPI ENGINE v2.0 (Multi-threaded)                 ║
-╠══════════════════════════════════════════════════════════════╣
-║ Load Balancers:  2    FPs per LB:  2    Total FPs:  4        ║
-╚══════════════════════════════════════════════════════════════╝
+Source IP : 192.168.1.15
 
-[Rules] Blocked app: YouTube
-[Rules] Blocked IP: 192.168.1.50
+Destination IP : 142.250.xx.xx
 
-[Reader] Processing packets...
-[Reader] Done reading 77 packets
-
-╔══════════════════════════════════════════════════════════════╗
-║                      PROCESSING REPORT                        ║
-╠══════════════════════════════════════════════════════════════╣
-║ Total Packets:                77                              ║
-║ Total Bytes:                5738                              ║
-║ TCP Packets:                  73                              ║
-║ UDP Packets:                   4                              ║
-╠══════════════════════════════════════════════════════════════╣
-║ Forwarded:                    69                              ║
-║ Dropped:                       8                              ║
-╠══════════════════════════════════════════════════════════════╣
-║ THREAD STATISTICS                                             ║
-║   LB0 dispatched:             53                              ║
-║   LB1 dispatched:             24                              ║
-║   FP0 processed:              53                              ║
-║   FP1 processed:               0                              ║
-║   FP2 processed:               0                              ║
-║   FP3 processed:              24                              ║
-╠══════════════════════════════════════════════════════════════╣
-║                   APPLICATION BREAKDOWN                       ║
-╠══════════════════════════════════════════════════════════════╣
-║ HTTPS                39  50.6% ##########                     ║
-║ Unknown              16  20.8% ####                           ║
-║ YouTube               4   5.2% # (BLOCKED)                    ║
-║ DNS                   4   5.2% #                              ║
-║ Facebook              3   3.9%                                ║
-║ ...                                                           ║
-╚══════════════════════════════════════════════════════════════╝
-
-[Detected Domains/SNIs]
-  - www.youtube.com -> YouTube
-  - www.facebook.com -> Facebook
-  - www.google.com -> Google
-  - github.com -> GitHub
-  ...
+Port : 443
 ```
 
-### What Each Section Means
+From this information it only knows that the client is communicating over HTTPS.
 
-| Section | Meaning |
+A DPI engine goes much further.
+
+```
+Source IP
+
+↓
+
+TLS Client Hello
+
+↓
+
+Extract SNI
+
+↓
+
+www.youtube.com
+
+↓
+
+Application = YouTube
+```
+
+Now the system knows that the user is accessing YouTube instead of simply using HTTPS.
+
+---
+
+# The Network Stack
+
+Every packet passes through multiple protocol layers before reaching an application.
+
+```mermaid
+flowchart TD
+
+A["Application Layer"]
+
+B["Transport Layer"]
+
+C["Network Layer"]
+
+D["Data Link Layer"]
+
+E["Physical Layer"]
+
+A --> B
+B --> C
+C --> D
+D --> E
+```
+
+Each layer adds its own header before the packet is transmitted across the network.
+
+---
+
+# Packet Structure
+
+Every network packet is composed of multiple protocol headers.
+
+```text
++-------------------------------------------------------------+
+| Ethernet Header                                              |
++-------------------------------------------------------------+
+| IPv4 Header                                                  |
++-------------------------------------------------------------+
+| TCP / UDP Header                                             |
++-------------------------------------------------------------+
+| Application Payload                                          |
++-------------------------------------------------------------+
+```
+
+The DPI engine parses these headers one by one to understand how the packet should be processed.
+
+---
+
+# Packet Processing Pipeline
+
+```mermaid
+flowchart LR
+
+A["Raw Packet"]
+
+B["Ethernet Parser"]
+
+C["IPv4 Parser"]
+
+D["TCP / UDP Parser"]
+
+E["Payload Analysis"]
+
+F["Traffic Classification"]
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+```
+
+Every stage extracts additional information from the packet before forwarding it to the next stage.
+
+---
+
+# What is a Network Flow?
+
+Packets belonging to the same communication session are grouped together into a **flow**.
+
+A flow is uniquely identified using the **Five Tuple**.
+
+| Field | Example |
 |---------|---------|
-| Configuration | Number of threads created |
-| Rules | Which blocking rules are active |
-| Total Packets | Packets read from input file |
-| Forwarded | Packets written to output file |
-| Dropped | Packets blocked (not written) |
-| Thread Statistics | Work distribution across threads |
-| Application Breakdown | Traffic classification results |
-| Detected SNIs | Actual domain names found |
+| Source IP | 192.168.1.10 |
+| Destination IP | 142.250.xx.xx |
+| Source Port | 52311 |
+| Destination Port | 443 |
+| Protocol | TCP |
+
+Instead of analyzing every packet independently, the engine tracks complete conversations.
+
+This improves performance and ensures that firewall decisions remain consistent throughout the lifetime of a connection.
 
 ---
 
-## 12. Extending the Project
+# How HTTPS Can Still Be Classified
 
-### Ideas for Improvement
+A common misconception is that encrypted HTTPS traffic cannot be analyzed.
 
-1. **Add More App Signatures**
-   ```cpp
-   // In types.cpp
-   if (sni.find("twitch") != std::string::npos)
-       return AppType::TWITCH;
-   ```
+Although packet payloads are encrypted, the TLS handshake exposes the **Server Name Indication (SNI)** before encryption begins.
 
-2. **Add Bandwidth Throttling**
-   ```cpp
-   // Instead of DROP, delay packets
-   if (shouldThrottle(flow)) {
-       std::this_thread::sleep_for(10ms);
-   }
-   ```
+```mermaid
+sequenceDiagram
 
-3. **Add Live Statistics Dashboard**
-   ```cpp
-   // Separate thread printing stats every second
-   void statsThread() {
-       while (running) {
-           printStats();
-           sleep(1);
-       }
-   }
-   ```
+participant Client
 
-4. **Add QUIC/HTTP3 Support**
-   - QUIC uses UDP on port 443
-   - SNI is in the Initial packet (encrypted differently)
+participant Server
 
-5. **Add Persistent Rules**
-   - Save rules to file
-   - Load on startup
+Client->>Server: Client Hello (Contains SNI)
 
----
+Server-->>Client: Server Certificate
 
-## Summary
+Client->>Server: TLS Key Exchange
 
-This DPI engine demonstrates:
+Note over Client,Server: Encrypted Communication Begins
+```
 
-1. **Network Protocol Parsing** - Understanding packet structure
-2. **Deep Packet Inspection** - Looking inside encrypted connections
-3. **Flow Tracking** - Managing stateful connections
-4. **Multi-threaded Architecture** - Scaling with thread pools
-5. **Producer-Consumer Pattern** - Thread-safe queues
+The SNI field contains the hostname requested by the client.
 
-The key insight is that even HTTPS traffic leaks the destination domain in the TLS handshake, allowing network operators to identify and control application usage.
+Example:
+
+```
+www.youtube.com
+
+github.com
+
+mail.google.com
+
+facebook.com
+```
+
+This allows the engine to identify the application without decrypting the communication.
 
 ---
 
-## Questions?
+# Application Classification
 
-If you have questions about any part of this project, the code is well-commented and follows the same flow described in this document. Start with the simple version (`main_working.cpp`) to understand the concepts, then move to the multi-threaded version (`dpi_mt.cpp`) to see how parallelism is added.
+After extracting the SNI, the engine maps domains to known applications.
 
-Happy learning! 🚀
+| Domain | Application |
+|---------|-------------|
+| youtube.com | YouTube |
+| github.com | GitHub |
+| facebook.com | Facebook |
+| google.com | Google |
+| unknown | Unknown |
+
+This classification powers the analytics dashboard and firewall engine.
+
+---
+
+# Firewall Decision Process
+
+Once a flow has been classified, firewall policies are evaluated.
+
+```mermaid
+flowchart TD
+
+A["Incoming Flow"]
+
+B["Extract Metadata"]
+
+C["Application Classification"]
+
+D{"Blocked?"}
+
+E["Forward"]
+
+F["Drop"]
+
+A --> B
+B --> C
+C --> D
+
+D -- No --> E
+
+D -- Yes --> F
+```
+
+Supported rule types include:
+
+- Block by IP Address
+- Block by Domain
+- Block by Application
+
+The decision is stored for the entire flow so subsequent packets do not need to be reclassified.
+
+---
+
+# Analytics Generation
+
+Every packet contributes to multiple statistics.
+
+Examples include:
+
+- Total Packets
+- Total Bytes
+- Protocol Distribution
+- TCP vs UDP
+- Active Connections
+- Blocked Traffic
+- Allowed Traffic
+- Application Distribution
+- Top Domains
+- Firewall Events
+
+These metrics are aggregated continuously and returned to the web dashboard for visualization.
+
+---
+
+# Bringing Everything Together
+
+```mermaid
+flowchart LR
+
+A["Upload PCAP"]
+
+B["React Dashboard"]
+
+C["Express Backend"]
+
+D["C++ DPI Engine"]
+
+E["Traffic Analysis"]
+
+F["Firewall"]
+
+G["Analytics"]
+
+H["Interactive Dashboard"]
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+F --> G
+G --> H
+```
+
+From a single PCAP file, the platform is able to parse packets, identify applications, apply firewall policies, generate statistics, and present the results through an intuitive web interface.
+
+This architecture demonstrates how native packet-processing systems can be integrated with modern full-stack web technologies to build enterprise-style network monitoring platforms.
