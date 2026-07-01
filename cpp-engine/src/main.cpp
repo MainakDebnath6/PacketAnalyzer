@@ -3,7 +3,6 @@
 #include <ctime>
 #include "pcap_reader.h"
 #include "packet_parser.h"
-#include "FirewallRules.hpp"
 
 using namespace PacketAnalyzer;
 

@@ -3,7 +3,6 @@
 #include <sstream>
 #include <vector>
 #include "dpi_engine.h"
-#include "FirewallRules.hpp"
 
 using namespace DPI;
 
@@ -92,7 +91,6 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> block_domains;
     std::string rules_file;
 
-    FirewallRules firewall;
     
     for (int i = 3; i < argc; i++) {
         std::string arg = argv[i];
