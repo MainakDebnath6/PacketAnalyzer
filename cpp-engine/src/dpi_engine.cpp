@@ -262,17 +262,21 @@ PacketJob DPIEngine::createPacketJob(const PacketAnalyzer::RawPacket& raw,
     // IP header length
     if (job.data.size() > 14) {
         uint8_t ip_ihl = job.data[14] & 0x0F;
+        if (ip_ihl < 5) return job;
         size_t ip_header_len = ip_ihl * 4;
         job.transport_offset = 14 + ip_header_len;
         
         // Transport header length
-        if (parsed.has_tcp && job.data.size() > job.transport_offset) {
+        if (parsed.has_tcp &&
+        job.transport_offset + 13 < job.data.size()) {
             uint8_t tcp_data_offset = (job.data[job.transport_offset + 12] >> 4) & 0x0F;
             size_t tcp_header_len = tcp_data_offset * 4;
             job.payload_offset = job.transport_offset + tcp_header_len;
-        } else if (parsed.has_udp) {
-            job.payload_offset = job.transport_offset + 8;  // UDP header is 8 bytes
-        }
+        } else if (parsed.has_udp &&
+         job.transport_offset + 8 <= job.data.size()) {
+
+    job.payload_offset = job.transport_offset + 8;
+}
         
         if (job.payload_offset < job.data.size()) {
             job.payload_length = job.data.size() - job.payload_offset;

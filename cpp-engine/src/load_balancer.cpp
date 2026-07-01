@@ -8,15 +8,19 @@ namespace DPI {
 // LoadBalancer Implementation
 // ============================================================================
 
-LoadBalancer::LoadBalancer(int lb_id,
-                           std::vector<ThreadSafeQueue<PacketJob>*> fp_queues,
-                           int fp_start_id)
+LoadBalancer::LoadBalancer(
+    int lb_id,
+    std::vector<ThreadSafeQueue<PacketJob>*> fp_queues,
+    int fp_start_id)
     : lb_id_(lb_id),
       fp_start_id_(fp_start_id),
-      num_fps_(fp_queues.size()),
+      num_fps_(static_cast<int>(fp_queues.size())),
       input_queue_(10000),
-      fp_queues_(std::move(fp_queues)),
-      per_fp_counts_(fp_queues.size()) {
+      fp_queues_(std::move(fp_queues)) {
+
+    per_fp_counts_.resize(num_fps_, 0);
+
+    
 }
 
 LoadBalancer::~LoadBalancer() {
@@ -61,6 +65,11 @@ void LoadBalancer::run() {
         int fp_index = selectFP(job_opt->tuple);
         
         // Push to selected FP's queue
+        
+
+        if (fp_index < 0 || fp_index >= static_cast<int>(fp_queues_.size())) {
+             throw std::runtime_error("Invalid Fast Path index");
+            }
         fp_queues_[fp_index]->push(std::move(*job_opt));
         
         packets_dispatched_++;
