@@ -31,7 +31,6 @@ set(SOURCES
     src/rule_manager.cpp
     src/sni_extractor.cpp
     src/types.cpp
-    src/FirewallRules.cpp
 )
 
 add_executable(dpi_engine ${SOURCES})
