@@ -527,13 +527,6 @@ The firewall interface allows users to create, manage, and remove filtering rule
 
 ---
 
-## 📤 PCAP Upload
-
-The upload interface allows users to submit packet capture files directly from the browser. Once uploaded, the backend invokes the C++ analysis engine, processes the capture, and returns structured analytics to the dashboard.
-
-<p align="center">
-<img src="./pics/dashboard.png" alt="Upload" width="100%">
-</p>
 
 # Learning Outcomes
 
